@@ -7,30 +7,29 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://adsgram.ai/js/adsgram.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #000; display: flex; flex-direction: column; align-items: center; padding-top: 40px; min-height: 100vh; margin: 0; }
-        .container { width: 90%; max-width: 400px; text-align: center; background: white; padding: 25px 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #000; display: flex; flex-direction: column; align-items: center; padding-top: 50px; min-height: 100vh; margin: 0; }
+        .container { width: 90%; max-width: 400px; text-align: center; background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
         /* Logo & Header */
-        .logo { font-size: 40px; margin-bottom: 10px; }
-        h2 { margin: 10px 0 5px; color: #222; font-weight: 700; }
-        .subtitle { font-size: 13px; color: #666; margin-bottom: 25px; }
-        .badge { background: #000; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .logo { font-size: 50px; margin-bottom: 15px; }
+        h2 { margin: 10px 0 5px; color: #222; font-weight: 800; font-size: 24px; }
+        .subtitle { font-size: 14px; color: #888; margin-bottom: 30px; }
 
         /* Inputs */
-        input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: 2px solid #eee; font-size: 16px; box-sizing: border-box; transition: 0.2s; outline: none; }
-        input:focus { border-color: #007bff; }
+        input { width: 100%; padding: 18px; margin-bottom: 20px; border-radius: 14px; border: 2px solid #f0f0f0; font-size: 16px; box-sizing: border-box; transition: 0.2s; outline: none; background: #fafafa; }
+        input:focus { border-color: #007bff; background: #fff; }
 
         /* Buttons */
-        button { background-color: #007bff; color: white; padding: 16px 30px; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 600; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button { background-color: #007bff; color: white; padding: 18px 30px; border: none; border-radius: 14px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 700; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
         button:active { transform: scale(0.98); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
         
-        .status { margin-top: 15px; font-size: 13px; color: #555; min-height: 20px; }
+        .status { margin-top: 15px; font-size: 13px; color: #666; min-height: 20px; }
         
         /* Result Area */
-        .download-area { display: none; margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 20px; animation: fadeIn 0.5s; }
-        .video-preview { width: 100%; border-radius: 12px; margin-bottom: 15px; background: #000; }
-        .btn-success { background-color: #28a745; text-decoration: none; }
+        .download-area { display: none; margin-top: 25px; border-top: 1px solid #f0f0f0; padding-top: 25px; animation: fadeIn 0.5s; }
+        .video-preview { width: 100%; border-radius: 12px; margin-bottom: 15px; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-success { background-color: #28a745; text-decoration: none; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -38,24 +37,24 @@
 <body>
 
     <div class="container">
-        <div class="logo">🎵</div>
-        <h2>TikTok Downloader</h2>
-        <p class="subtitle">Download videos without watermark <br> <span class="badge">TikTok Only</span></p>
+        <div class="logo">🎥</div>
+        <h2>Video Downloader</h2>
+        <p class="subtitle">Download without watermark</p>
 
-        <input type="text" id="videoLink" placeholder="Paste TikTok link here...">
+        <input type="text" id="videoLink" placeholder="Paste link here...">
         
         <button id="mainBtn" onclick="processLink()">
-            <span>📺</span> Watch Ad & Download
+            ⬇️ Download Video
         </button>
         
-        <p class="status" id="statusText">Server ready. Paste a link to start.</p>
+        <p class="status" id="statusText">Ready to download.</p>
 
         <div id="downloadArea" class="download-area">
             <video id="vidPreview" class="video-preview" controls></video>
             <a id="downloadBtn" href="#" target="_blank" style="text-decoration: none;">
-                <button class="btn-success">⬇️ Save Video</button>
+                <button class="btn-success">Save to Gallery 📥</button>
             </a>
-            <button onclick="location.reload()" style="background:#f0f0f0; color:#333; margin-top:10px">🔄 Download Another</button>
+            <button onclick="location.reload()" style="background:#f5f5f5; color:#333; margin-top:10px; box-shadow:none;">🔄 Download Another</button>
         </div>
     </div>
 
@@ -63,7 +62,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ✅ Your Block ID is set
+        // ✅ Block ID (Do not change)
         const MyBlockID = "20348"; 
 
         async function processLink() {
@@ -71,68 +70,66 @@
             const status = document.getElementById('statusText');
             const mainBtn = document.getElementById('mainBtn');
 
-            // 1. Validation (Must be TikTok)
-            if (!link || !link.includes("tiktok")) {
-                status.innerText = "⚠️ Please paste a valid TikTok link!";
-                status.style.color = "#dc3545"; // Red
+            // 1. Validation
+            if (!link) {
+                status.innerText = "Please paste a link first!";
+                status.style.color = "#dc3545";
                 return;
             }
 
-            // 2. Show Ad
-            status.innerText = "⏳ Loading Ad...";
+            // 2. Show Ad Logic
+            status.innerText = "Please wait...";
             mainBtn.disabled = true;
 
             try {
                 const AdController = window.Adsgram.init({ blockId: MyBlockID });
                 
+                // Show Ad
                 await AdController.show().then((result) => {
-                    // ✅ Ad watched -> Fetch Video
-                    status.innerText = "🔄 Processing video...";
-                    status.style.color = "#007bff"; // Blue
+                    // Ad Success -> Start Download
+                    status.innerText = "Processing...";
+                    status.style.color = "#007bff";
                     fetchVideo(link);
                 }).catch((result) => {
-                    // ❌ Ad skipped/failed
-                    status.innerText = "⚠️ You must watch the ad to download.";
-                    status.style.color = "#ffc107"; // Orange
+                    // Ad Failed/Skipped -> Warning
+                    status.innerText = "Ad skipped. Please try again.";
+                    status.style.color = "#ffc107";
                     mainBtn.disabled = false;
                 });
             } catch (e) {
+                // Fallback (if ads fail, still try to download)
                 console.error(e);
-                // Fallback if ad fails completely
-                status.innerText = "⚠️ Ad error. Trying to download anyway...";
+                status.innerText = "Connecting...";
                 fetchVideo(link); 
             }
         }
 
-        // Fetch from Free API
+        // Fetch API
         async function fetchVideo(url) {
             const status = document.getElementById('statusText');
             const mainBtn = document.getElementById('mainBtn');
             const downloadArea = document.getElementById('downloadArea');
             
             try {
-                // Using TiklyDown Free API
                 const response = await fetch(`https://api.tiklydown.eu/api/download?url=${url}`);
                 const data = await response.json();
 
                 if (data && data.video && data.video.noWatermark) {
-                    // ✅ Success
-                    status.innerText = "✅ Video Ready!";
-                    status.style.color = "#28a745"; // Green
+                    // Success
+                    status.innerText = "✅ Done!";
+                    status.style.color = "#28a745";
                     
-                    // Show result
                     downloadArea.style.display = "block";
                     document.getElementById('vidPreview').src = data.video.noWatermark;
                     document.getElementById('downloadBtn').href = data.video.noWatermark;
                     
-                    // Hide main button
                     mainBtn.style.display = "none";
                 } else {
                     throw new Error("Video not found");
                 }
 
             } catch (error) {
-                status.innerText = "❌ Failed. Make sure the link is correct.";
+                status.innerText = "❌ Error. Link might be invalid.";
                 status.style.color = "red";
                 mainBtn.disabled = false;
             }
