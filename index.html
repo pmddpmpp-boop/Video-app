@@ -3,29 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحميل فيديو سريع</title>
+    <title>تحميل فيديو</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://adsgram.ai/js/adsgram.js?blockId=0"></script>
+    <script src="https://adsgram.ai/js/adsgram.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #fff; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .container { width: 90%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 16px; }
-        button { background-color: #3390ec; color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; font-weight: bold; }
-        .status { margin-top: 20px; font-size: 14px; color: gray; }
+        h2 { margin-bottom: 20px; color: #333; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 16px 30px; border: none; border-radius: 12px; font-size: 18px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .status { margin-top: 20px; font-size: 14px; color: #555; line-height: 1.5; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h2>📥 تحميل فيديو</h2>
-        <input type="text" id="videoLink" placeholder="ضع الرابط هنا...">
-        <button onclick="handleDownload()">🚀 تحميل</button>
-        <p class="status" id="statusText"></p>
+        <h2>📥 تحميل فيديو سريع</h2>
+        <input type="text" id="videoLink" placeholder="ضع رابط الفيديو هنا...">
+        <button onclick="showAdAndDownload()">🚀 تحميل مجاني</button>
+        <p class="status" id="statusText">شاهد إعلاناً قصيراً لدعم التطبيق والتحميل.</p>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        function handleDownload() {
-            document.getElementById('statusText').innerText = "تم النقر! (سنفعل الإعلانات قريباً)";
+
+        // ✅ تم وضع رقم البلوك الخاص بك هنا
+        const MyBlockID = "20348"; 
+
+        async function showAdAndDownload() {
+            const link = document.getElementById('videoLink').value;
+            const status = document.getElementById('statusText');
+
+            if (!link) {
+                status.innerText = "⚠️ يرجى لصق الرابط أولاً!";
+                status.style.color = "red";
+                return;
+            }
+
+            status.innerText = "⏳ جاري تحضير الإعلان...";
+
+            try {
+                // استدعاء الإعلان
+                const AdController = window.Adsgram.init({ blockId: MyBlockID });
+                
+                await AdController.show().then((result) => {
+                    // المستخدم شاهد الإعلان للنهاية (نجاح) ✅
+                    status.innerText = "✅ شكراً لك! جاري تحميل الفيديو...";
+                    status.style.color = "green";
+                    
+                    // محاكاة التحميل
+                    setTimeout(() => {
+                        alert("🎉 تم قبول الطلب!");
+                    }, 1000);
+
+                }).catch((result) => {
+                    // المستخدم أغلق الإعلان أو حدث خطأ ❌
+                    status.innerText = "⚠️ عذراً، يجب مشاهدة الإعلان للنهاية للتحميل.";
+                    status.style.color = "orange";
+                });
+            } catch (e) {
+                status.innerText = "خطأ في تحميل الإعلان (تأكد من الاتصال)";
+                console.error(e);
+            }
         }
     </script>
 </body>
