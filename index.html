@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <script src="https://adsgram.ai/js/adsgram.js"></script>
+    
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #000; display: flex; flex-direction: column; align-items: center; padding-top: 50px; min-height: 100vh; margin: 0; }
         .container { width: 90%; max-width: 400px; text-align: center; background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -17,7 +19,10 @@
         button { background-color: #007bff; color: white; padding: 18px 30px; border: none; border-radius: 14px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 700; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
         button:active { transform: scale(0.98); }
         button:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
-        .status { margin-top: 15px; font-size: 13px; color: #666; min-height: 20px; }
+        
+        .status { margin-top: 15px; font-size: 13px; color: #666; min-height: 20px; font-weight: bold; }
+        .ad-status { margin-bottom: 15px; font-size: 12px; padding: 5px; border-radius: 5px; background: #eee; }
+
         .download-area { display: none; margin-top: 25px; border-top: 1px solid #f0f0f0; padding-top: 25px; animation: fadeIn 0.5s; }
         .video-preview { width: 100%; border-radius: 12px; margin-bottom: 15px; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn-success { background-color: #28a745; text-decoration: none; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
@@ -30,6 +35,8 @@
         <div class="logo">🎥</div>
         <h2>Video Downloader</h2>
         <p class="subtitle">Download without watermark</p>
+        
+        <div id="adConnectionStatus" class="ad-status">🔄 Checking Ads connection...</div>
 
         <input type="text" id="videoLink" placeholder="Paste TikTok link here...">
         
@@ -37,7 +44,7 @@
             ⬇️ Download Video
         </button>
         
-        <p class="status" id="statusText">Ready to download.</p>
+        <p class="status" id="statusText">Ready.</p>
 
         <div id="downloadArea" class="download-area">
             <video id="vidPreview" class="video-preview" controls></video>
@@ -51,9 +58,21 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
-        // ✅ Block ID
         const MyBlockID = "20348"; 
+
+        // 🟢 فحص فوري عند فتح التطبيق
+        window.onload = function() {
+            const statusDiv = document.getElementById('adConnectionStatus');
+            if (window.Adsgram) {
+                statusDiv.innerText = "✅ Ads System: ONLINE (Ready to earn)";
+                statusDiv.style.color = "green";
+                statusDiv.style.backgroundColor = "#e8f5e9";
+            } else {
+                statusDiv.innerText = "❌ Ads System: BLOCKED (AdBlock detected)";
+                statusDiv.style.color = "red";
+                statusDiv.style.backgroundColor = "#ffebee";
+            }
+        };
 
         async function processLink() {
             const link = document.getElementById('videoLink').value;
@@ -66,30 +85,31 @@
                 return;
             }
 
-            status.innerText = "Loading Ad...";
+            status.innerText = "Checking...";
             mainBtn.disabled = true;
 
+            // إذا كانت الإعلانات محظورة، حمل الفيديو مباشرة
+            if (typeof window.Adsgram === 'undefined') {
+                status.innerText = "Ads blocked. Downloading directly...";
+                fetchVideo(link);
+                return;
+            }
+
             try {
-                const AdController = window.Adsgram.init({ blockId: MyBlockID, debug: true });
-                
+                const AdController = window.Adsgram.init({ blockId: MyBlockID });
                 await AdController.show().then((result) => {
-                    // ✅ Ad Success
-                    status.innerText = "Processing video...";
+                    status.innerText = "Processing...";
                     status.style.color = "#007bff";
                     fetchVideo(link);
                 }).catch((result) => {
-                    // ❌ Ad Failed - Show Error Alert
+                    // فشل العرض (مثلاً المستخدم أغلق بسرعة أو لا يوجد إعلان)
                     console.log(result);
-                    // هذا السطر سيظهر لك رسالة الخطأ
-                    alert("Ads Error: " + JSON.stringify(result));
-                    
-                    status.innerText = "Ad skipped (Error). Downloading...";
+                    status.innerText = "Downloading..."; 
                     fetchVideo(link); 
                 });
             } catch (e) {
-                alert("Init Error: " + e.message);
-                status.innerText = "Connecting...";
-                fetchVideo(link); 
+                status.innerText = "Downloading...";
+                fetchVideo(link);
             }
         }
 
@@ -97,7 +117,6 @@
             const status = document.getElementById('statusText');
             const mainBtn = document.getElementById('mainBtn');
             
-            // Server 1
             try {
                 const response = await fetch(`https://www.tikwm.com/api/?url=${url}`);
                 const data = await response.json();
@@ -105,9 +124,8 @@
                     showSuccess(data.data.play);
                     return;
                 }
-            } catch (e) { console.log("S1 failed"); }
+            } catch (e) { }
 
-            // Server 2
             try {
                 const response = await fetch(`https://api.tiklydown.eu/api/download?url=${url}`);
                 const data = await response.json();
@@ -115,7 +133,7 @@
                     showSuccess(data.video.noWatermark);
                     return;
                 }
-            } catch (e) { console.log("S2 failed"); }
+            } catch (e) { }
 
             status.innerText = "❌ Error. Try using a 'Long Link'.";
             status.style.color = "red";
