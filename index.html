@@ -1,71 +1,140 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحميل فيديو</title>
+    <title>TikTok Downloader</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://adsgram.ai/js/adsgram.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #fff; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { width: 90%; max-width: 400px; text-align: center; }
-        h2 { margin-bottom: 20px; color: #333; }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        button { background-color: #007bff; color: white; padding: 16px 30px; border: none; border-radius: 12px; font-size: 18px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #000; display: flex; flex-direction: column; align-items: center; padding-top: 40px; min-height: 100vh; margin: 0; }
+        .container { width: 90%; max-width: 400px; text-align: center; background: white; padding: 25px 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        
+        /* Logo & Header */
+        .logo { font-size: 40px; margin-bottom: 10px; }
+        h2 { margin: 10px 0 5px; color: #222; font-weight: 700; }
+        .subtitle { font-size: 13px; color: #666; margin-bottom: 25px; }
+        .badge { background: #000; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+
+        /* Inputs */
+        input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: 2px solid #eee; font-size: 16px; box-sizing: border-box; transition: 0.2s; outline: none; }
+        input:focus { border-color: #007bff; }
+
+        /* Buttons */
+        button { background-color: #007bff; color: white; padding: 16px 30px; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 600; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         button:active { transform: scale(0.98); }
-        .status { margin-top: 20px; font-size: 14px; color: #555; line-height: 1.5; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        .status { margin-top: 15px; font-size: 13px; color: #555; min-height: 20px; }
+        
+        /* Result Area */
+        .download-area { display: none; margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 20px; animation: fadeIn 0.5s; }
+        .video-preview { width: 100%; border-radius: 12px; margin-bottom: 15px; background: #000; }
+        .btn-success { background-color: #28a745; text-decoration: none; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>📥 تحميل فيديو سريع</h2>
-        <input type="text" id="videoLink" placeholder="ضع رابط الفيديو هنا...">
-        <button onclick="showAdAndDownload()">🚀 تحميل مجاني</button>
-        <p class="status" id="statusText">شاهد إعلاناً قصيراً لدعم التطبيق والتحميل.</p>
+        <div class="logo">🎵</div>
+        <h2>TikTok Downloader</h2>
+        <p class="subtitle">Download videos without watermark <br> <span class="badge">TikTok Only</span></p>
+
+        <input type="text" id="videoLink" placeholder="Paste TikTok link here...">
+        
+        <button id="mainBtn" onclick="processLink()">
+            <span>📺</span> Watch Ad & Download
+        </button>
+        
+        <p class="status" id="statusText">Server ready. Paste a link to start.</p>
+
+        <div id="downloadArea" class="download-area">
+            <video id="vidPreview" class="video-preview" controls></video>
+            <a id="downloadBtn" href="#" target="_blank" style="text-decoration: none;">
+                <button class="btn-success">⬇️ Save Video</button>
+            </a>
+            <button onclick="location.reload()" style="background:#f0f0f0; color:#333; margin-top:10px">🔄 Download Another</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ✅ تم وضع رقم البلوك الخاص بك هنا
+        // ✅ Your Block ID is set
         const MyBlockID = "20348"; 
 
-        async function showAdAndDownload() {
+        async function processLink() {
             const link = document.getElementById('videoLink').value;
             const status = document.getElementById('statusText');
+            const mainBtn = document.getElementById('mainBtn');
 
-            if (!link) {
-                status.innerText = "⚠️ يرجى لصق الرابط أولاً!";
-                status.style.color = "red";
+            // 1. Validation (Must be TikTok)
+            if (!link || !link.includes("tiktok")) {
+                status.innerText = "⚠️ Please paste a valid TikTok link!";
+                status.style.color = "#dc3545"; // Red
                 return;
             }
 
-            status.innerText = "⏳ جاري تحضير الإعلان...";
+            // 2. Show Ad
+            status.innerText = "⏳ Loading Ad...";
+            mainBtn.disabled = true;
 
             try {
-                // استدعاء الإعلان
                 const AdController = window.Adsgram.init({ blockId: MyBlockID });
                 
                 await AdController.show().then((result) => {
-                    // المستخدم شاهد الإعلان للنهاية (نجاح) ✅
-                    status.innerText = "✅ شكراً لك! جاري تحميل الفيديو...";
-                    status.style.color = "green";
-                    
-                    // محاكاة التحميل
-                    setTimeout(() => {
-                        alert("🎉 تم قبول الطلب!");
-                    }, 1000);
-
+                    // ✅ Ad watched -> Fetch Video
+                    status.innerText = "🔄 Processing video...";
+                    status.style.color = "#007bff"; // Blue
+                    fetchVideo(link);
                 }).catch((result) => {
-                    // المستخدم أغلق الإعلان أو حدث خطأ ❌
-                    status.innerText = "⚠️ عذراً، يجب مشاهدة الإعلان للنهاية للتحميل.";
-                    status.style.color = "orange";
+                    // ❌ Ad skipped/failed
+                    status.innerText = "⚠️ You must watch the ad to download.";
+                    status.style.color = "#ffc107"; // Orange
+                    mainBtn.disabled = false;
                 });
             } catch (e) {
-                status.innerText = "خطأ في تحميل الإعلان (تأكد من الاتصال)";
                 console.error(e);
+                // Fallback if ad fails completely
+                status.innerText = "⚠️ Ad error. Trying to download anyway...";
+                fetchVideo(link); 
+            }
+        }
+
+        // Fetch from Free API
+        async function fetchVideo(url) {
+            const status = document.getElementById('statusText');
+            const mainBtn = document.getElementById('mainBtn');
+            const downloadArea = document.getElementById('downloadArea');
+            
+            try {
+                // Using TiklyDown Free API
+                const response = await fetch(`https://api.tiklydown.eu/api/download?url=${url}`);
+                const data = await response.json();
+
+                if (data && data.video && data.video.noWatermark) {
+                    // ✅ Success
+                    status.innerText = "✅ Video Ready!";
+                    status.style.color = "#28a745"; // Green
+                    
+                    // Show result
+                    downloadArea.style.display = "block";
+                    document.getElementById('vidPreview').src = data.video.noWatermark;
+                    document.getElementById('downloadBtn').href = data.video.noWatermark;
+                    
+                    // Hide main button
+                    mainBtn.style.display = "none";
+                } else {
+                    throw new Error("Video not found");
+                }
+
+            } catch (error) {
+                status.innerText = "❌ Failed. Make sure the link is correct.";
+                status.style.color = "red";
+                mainBtn.disabled = false;
             }
         }
     </script>
