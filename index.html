@@ -5,28 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://adsgram.ai/js/adsgram.js"></script>
+    
+    <script src='//libtl.com/sdk.js' data-zone='10400873' data-sdk='show_10400873'></script>
+
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #000; display: flex; flex-direction: column; align-items: center; padding-top: 50px; min-height: 100vh; margin: 0; }
         .container { width: 90%; max-width: 400px; text-align: center; background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        
         .logo { font-size: 50px; margin-bottom: 15px; }
         h2 { margin: 10px 0 5px; color: #222; font-weight: 800; font-size: 24px; }
         .subtitle { font-size: 14px; color: #888; margin-bottom: 30px; }
-
         input { width: 100%; padding: 18px; margin-bottom: 20px; border-radius: 14px; border: 2px solid #f0f0f0; font-size: 16px; box-sizing: border-box; transition: 0.2s; outline: none; background: #fafafa; }
         input:focus { border-color: #007bff; background: #fff; }
-
         button { background-color: #007bff; color: white; padding: 18px 30px; border: none; border-radius: 14px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 700; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
         button:active { transform: scale(0.98); }
         button:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
-        
         .status { margin-top: 15px; font-size: 13px; color: #666; min-height: 20px; }
-        
         .download-area { display: none; margin-top: 25px; border-top: 1px solid #f0f0f0; padding-top: 25px; animation: fadeIn 0.5s; }
         .video-preview { width: 100%; border-radius: 12px; margin-bottom: 15px; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn-success { background-color: #28a745; text-decoration: none; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -58,9 +54,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ✅ Block ID
-        const MyBlockID = "20348"; 
-
         async function processLink() {
             const link = document.getElementById('videoLink').value;
             const status = document.getElementById('statusText');
@@ -73,27 +66,30 @@
             }
 
             status.innerText = "Please wait...";
+            status.style.color = "#007bff";
             mainBtn.disabled = true;
 
-            // حماية ذكية: إذا الإعلانات محظورة، حمل الفيديو مباشرة
-            if (typeof window.Adsgram === 'undefined') {
-                fetchVideo(link);
-                return;
-            }
-
+            // 🔥 تشغيل الإعلان (Monetag) 🔥
             try {
-                const AdController = window.Adsgram.init({ blockId: MyBlockID });
-                await AdController.show().then((result) => {
-                    // شاهد الإعلان
-                    status.innerText = "Processing video...";
-                    status.style.color = "#007bff";
+                if (typeof show_10400873 === 'function') {
+                    // محاولة إظهار الإعلان
+                    show_10400873('pop').then(() => {
+                        // عند انتهاء الإعلان أو إغلاقه -> يبدأ التحميل
+                        status.innerText = "Processing video...";
+                        fetchVideo(link);
+                    }).catch(e => {
+                        // في حال وجود خطأ في الإعلان -> نتابع التحميل ولا نعطل المستخدم
+                        console.log("Ad Error:", e);
+                        status.innerText = "Processing video...";
+                        fetchVideo(link);
+                    });
+                } else {
+                    // في حال لم يتم تحميل سكربت الإعلانات
                     fetchVideo(link);
-                }).catch((result) => {
-                    // تخطى الإعلان أو خطأ
-                    fetchVideo(link); 
-                });
-            } catch (e) {
-                fetchVideo(link); 
+                }
+            } catch (error) {
+                // أي خطأ غير متوقع -> حمل الفيديو مباشرة
+                fetchVideo(link);
             }
         }
 
@@ -130,14 +126,11 @@
             const status = document.getElementById('statusText');
             const mainBtn = document.getElementById('mainBtn');
             const downloadArea = document.getElementById('downloadArea');
-
             status.innerText = "✅ Done!";
             status.style.color = "#28a745";
-            
             downloadArea.style.display = "block";
             document.getElementById('vidPreview').src = videoUrl;
             document.getElementById('downloadBtn').href = videoUrl;
-            
             mainBtn.style.display = "none";
         }
     </script>
